@@ -1,0 +1,16 @@
+- name: Overview
+  href: index.md
+- name: Getting started (README)
+  href: ../README.md
+- name: FAI API field notes
+  href: fai-api-notes.md
+- name: API reference
+  href: api/
+- name: Changelog
+  href: ../CHANGELOG.md
+- name: Contributing
+  href: ../CONTRIBUTING.md
+- name: Security
+  href: ../SECURITY.md
+- name: Library template (AlfaVision)
+  href: library-template.md
