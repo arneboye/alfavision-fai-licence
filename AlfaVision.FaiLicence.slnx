@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/AlfaVision.FaiLicence/AlfaVision.FaiLicence.csproj" />
+  <Project Path="tests/AlfaVision.FaiLicence.Tests/AlfaVision.FaiLicence.Tests.csproj" />
+</Solution>

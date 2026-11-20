@@ -1,0 +1,19 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+indent_style = space
+indent_size = 4
+
+# Dead code is a build error (unused private members, never-read fields, unused parameters).
+[*.cs]
+dotnet_diagnostic.IDE0051.severity = error
+dotnet_diagnostic.IDE0052.severity = error
+dotnet_diagnostic.IDE0060.severity = error
+dotnet_diagnostic.CS0169.severity = error
+dotnet_diagnostic.CS0414.severity = error
+
+[*.{yml,yaml,json,slnx,csproj,props}]
+indent_size = 2
