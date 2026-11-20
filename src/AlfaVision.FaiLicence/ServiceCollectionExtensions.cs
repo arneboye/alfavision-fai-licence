@@ -6,7 +6,8 @@ namespace AlfaVision.FaiLicence;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers <see cref="FaiLicenceClient"/> with a typed <see cref="HttpClient"/> (20 s timeout) and the given options.
+    /// Registers <see cref="FaiLicenceClient"/> (and <see cref="IFaiLicenceClient"/>, resolving to the same registration)
+    /// with a typed <see cref="HttpClient"/> (20 s timeout) and the given options.
     /// <para>
     /// Request logging is removed on purpose: the FAI API takes the credentials as query-string parameters, and the
     /// default <c>HttpClient</c> logging writes the full request URL at Information level — which would put the
@@ -17,6 +18,7 @@ public static class ServiceCollectionExtensions
     {
         services.Configure(configure);
         services.AddHttpClient<FaiLicenceClient>(c => c.Timeout = TimeSpan.FromSeconds(20)).RemoveAllLoggers();
+        services.AddTransient<IFaiLicenceClient>(sp => sp.GetRequiredService<FaiLicenceClient>());
         return services;
     }
 }

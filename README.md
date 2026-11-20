@@ -51,7 +51,7 @@ builder.Services.AddFaiLicenceClient(o =>
 ```
 
 ```csharp
-public sealed class LicenceCheck(FaiLicenceClient fai)
+public sealed class LicenceCheck(IFaiLicenceClient fai)
 {
     public async Task<FaiLicence?> CurrentCardAsync(string licenceNumber, string ioc, CancellationToken ct)
     {
@@ -80,6 +80,43 @@ var details = await client.GetDetailsAsync(idLicence);
 
 `FaiLicenceException` is thrown for HTTP errors, timeouts and unparsable answers; `InvalidOperationException` when the
 client is not configured or a non-allowed path is requested.
+
+Depend on `IFaiLicenceClient` rather than the concrete class — the registration provides both — so your own code can
+be tested without FAI (next section).
+
+## Testing your code
+
+Three options, from lightest to most realistic. None of them touches the network.
+
+**1. Mock the interface** (NSubstitute, Moq, …):
+
+```csharp
+var fai = Substitute.For<IFaiLicenceClient>();
+fai.SearchAsync(Arg.Any<IDictionary<string, string?>>(), Arg.Any<CancellationToken>())
+   .Returns(new[] { FaiLicenceTestData.AnneValid });
+var sut = new LicenceCheck(fai);
+```
+
+**2. `FakeFaiLicenceClient`** (namespace `AlfaVision.FaiLicence.Testing`) — an in-memory implementation that filters like
+FAI (`search_number`, `search_name`, `country`, `discipline`, `include_invalid`, paging) and records every call:
+
+```csharp
+var fake = new FakeFaiLicenceClient();
+fake.Licences.AddRange(FaiLicenceTestData.Cards);          // two Danish pilots, one Australian; one expired card
+fake.Error = new FaiLicenceException("The FAI licence database answered 503.");   // optional: simulate an outage
+services.AddSingleton<IFaiLicenceClient>(fake);            // after AddFaiLicenceClient — the last registration wins
+```
+
+**3. `FaiLicenceTestHandler`** — an `HttpMessageHandler` that answers like FAI's API (JSON field names, `1`/`0` expiry
+flags, `403` on wrong credentials or write endpoints, `404` on unknown ids), so the real `FaiLicenceClient` runs end to end:
+
+```csharp
+var handler = new FaiLicenceTestHandler { Username = "nac-api-user", Password = "secret" };
+var client = new FaiLicenceClient(new HttpClient(handler), Options.Create(options));
+var cards = await client.SearchAsync(new Dictionary<string, string?> { ["search_number"] = "DSvU1002", ["include_invalid"] = "1" });
+```
+
+`FaiLicenceTestData` holds the ready-made cards (`AnneValid`, `BoExpired`, `BoValid`, `JaneAus`) and their details.
 
 ## Try it
 

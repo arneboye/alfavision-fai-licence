@@ -31,6 +31,9 @@ every item; copy its files rather than retyping them.
   `SectionName` constant and `IsConfigured`.
 - Error messages never contain secrets. Cover it with a test.
 - Tests never call the real external service.
+- Expose the client as an interface (`I<Name>Client`) and ship test helpers in a `<Name>.Testing` namespace (an
+  in-memory fake and an `HttpMessageHandler` that answers like the real service, plus deterministic test data), so
+  consumers can test their own code without the network. Document them in a README section "Testing your code".
 
 ## CI and release
 

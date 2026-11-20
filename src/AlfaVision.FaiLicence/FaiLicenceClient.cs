@@ -15,7 +15,7 @@ namespace AlfaVision.FaiLicence;
 /// and never log or echo a URL built by this client. Error messages never contain the URL or the credentials.
 /// </para>
 /// </summary>
-public sealed class FaiLicenceClient(HttpClient http, IOptions<FaiLicenceOptions> options)
+public sealed class FaiLicenceClient(HttpClient http, IOptions<FaiLicenceOptions> options) : IFaiLicenceClient
 {
     /// <summary>The only paths this client will ever call: the search list and <c>licence/{digits}</c>.</summary>
     public static readonly IReadOnlyList<string> AllowedPaths = ["licences", "licence/"];
