@@ -81,6 +81,21 @@ var details = await client.GetDetailsAsync(idLicence);
 `FaiLicenceException` is thrown for HTTP errors, timeouts and unparsable answers; `InvalidOperationException` when the
 client is not configured or a non-allowed path is requested.
 
+## Try it
+
+The repository contains a sample console app (`samples/FaiLicence.Sample`). Put your FAI credentials in user secrets
+(never in a file that is committed) and search:
+
+```
+dotnet user-secrets set "FaiLicenceApi:BaseUrl"  "https://extranet.fai.org/fai/en/api/v1/" --project samples/FaiLicence.Sample
+dotnet user-secrets set "FaiLicenceApi:Username" "<your API user>"                           --project samples/FaiLicence.Sample
+dotnet user-secrets set "FaiLicenceApi:Password" "<your password>"                           --project samples/FaiLicence.Sample
+dotnet run --project samples/FaiLicence.Sample -- --number 1234 --country DEN
+dotnet run --project samples/FaiLicence.Sample -- --name Jensen --country DEN
+```
+
+Environment variables work too (`FaiLicenceApi__BaseUrl`, `FaiLicenceApi__Username`, `FaiLicenceApi__Password`).
+
 ## Configuration
 
 | Option | Meaning | Default |
@@ -101,6 +116,13 @@ Without `BaseUrl`, `Username` and `Password` the client reports `IsConfigured ==
 - **Read-only.** Only `licences` and `licence/{digits}` can be called; everything else throws before any request is made.
 - **Personal data.** Search results contain names and dates of birth of real people. Keep only what you need, and do
   not log or persist date of birth of people who are not your own members.
+
+## Documentation
+
+- **[Documentation site](https://arneboye.github.io/alfavision-fai-licence/)** — API reference generated from the XML
+  docs, plus the pages below.
+- **[FAI API field notes](https://arneboye.github.io/alfavision-fai-licence/fai-api-notes.html)** ([source](https://github.com/arneboye/alfavision-fai-licence/blob/main/docs/fai-api-notes.md)) — what the manual does not tell you.
+- **[Changelog](CHANGELOG.md)** · **[Contributing](CONTRIBUTING.md)** · **[Security](SECURITY.md)**.
 
 ## Getting FAI credentials
 
