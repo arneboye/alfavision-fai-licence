@@ -9,7 +9,7 @@ namespace AlfaVision.FaiLicence.Testing;
 /// <summary>
 /// An <see cref="HttpMessageHandler"/> that behaves like FAI's licence API over HTTP, for tests that want to exercise
 /// the real <see cref="FaiLicenceClient"/> (URL building, credentials, JSON parsing) without the network:
-/// <c>new FaiLicenceClient(new HttpClient(new FaiLicenceTestHandler()), options)</c>.
+/// <c>new FaiLicenceClient(new HttpClient(new FaiLicenceTestHandler()), options, NullLogger&lt;FaiLicenceClient&gt;.Instance)</c>.
 /// <para>
 /// It answers <c>licences?…</c> with the cards in <see cref="Licences"/> filtered as FAI does (see
 /// <see cref="FakeFaiLicenceClient.Filter"/>), <c>licence/{id}</c> with the matching card's details, <c>403</c> when

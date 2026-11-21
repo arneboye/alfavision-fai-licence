@@ -31,6 +31,11 @@ every item; copy its files rather than retyping them.
   `SectionName` constant and `IsConfigured`.
 - Error messages never contain secrets. Cover it with a test.
 - Tests never call the real external service.
+- Logging goes through `Microsoft.Extensions.Logging.ILogger<T>`, taken as a **required** constructor parameter (never
+  optional, never a static logger such as `Serilog.Log`): the consumer passes `NullLogger<T>.Instance` when it has no
+  logging. Log the activity at a meaningful technical level (Debug start, Information result with counts and duration,
+  Warning on failure) and never secrets, URLs with credentials or personal data. Document the levels in a README
+  section "Logging" and show how to assert lines with `FakeLogger<T>` (Microsoft.Extensions.Diagnostics.Testing).
 - Expose the client as an interface (`I<Name>Client`) and ship test helpers in a `<Name>.Testing` namespace (an
   in-memory fake and an `HttpMessageHandler` that answers like the real service, plus deterministic test data), so
   consumers can test their own code without the network. Document them in a README section "Testing your code".

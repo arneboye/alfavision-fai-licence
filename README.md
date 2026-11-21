@@ -74,7 +74,7 @@ Without DI:
 
 ```csharp
 var options = Options.Create(new FaiLicenceOptions { BaseUrl = "...", Username = "...", Password = "..." });
-var client = new FaiLicenceClient(new HttpClient(), options);
+var client = new FaiLicenceClient(new HttpClient(), options, NullLogger<FaiLicenceClient>.Instance);   // or a real ILogger<FaiLicenceClient>
 var details = await client.GetDetailsAsync(idLicence);
 ```
 
@@ -112,11 +112,23 @@ flags, `403` on wrong credentials or write endpoints, `404` on unknown ids), so 
 
 ```csharp
 var handler = new FaiLicenceTestHandler { Username = "nac-api-user", Password = "secret" };
-var client = new FaiLicenceClient(new HttpClient(handler), Options.Create(options));
+var client = new FaiLicenceClient(new HttpClient(handler), Options.Create(options), NullLogger<FaiLicenceClient>.Instance);
 var cards = await client.SearchAsync(new Dictionary<string, string?> { ["search_number"] = "DSvU1002", ["include_invalid"] = "1" });
 ```
 
 `FaiLicenceTestData` holds the ready-made cards (`AnneValid`, `BoExpired`, `BoValid`, `JaneAus`) and their details.
+
+**Asserting what gets logged** — the client takes a `Microsoft.Extensions.Logging.ILogger<FaiLicenceClient>`, so use
+`FakeLogger<T>` from the `Microsoft.Extensions.Diagnostics.Testing` package to check the lines (and that no line ever
+contains your password):
+
+```csharp
+var log = new FakeLogger<FaiLicenceClient>();
+var client = new FaiLicenceClient(new HttpClient(handler), Options.Create(options), log);
+await client.SearchAsync(new Dictionary<string, string?> { ["search_number"] = "DSvU1002" });
+Assert.Contains(log.Collector.GetSnapshot(), r => r.Level == LogLevel.Information && r.Message.Contains("returned 1 licences"));
+Assert.DoesNotContain(log.Collector.GetSnapshot(), r => r.Message.Contains(options.Password!));
+```
 
 ## Try it
 
@@ -143,6 +155,22 @@ Environment variables work too (`FaiLicenceApi__BaseUrl`, `FaiLicenceApi__Userna
 | `PauseMs` | Suggested pause between lookups in bulk checks | 400 |
 
 Without `BaseUrl`, `Username` and `Password` the client reports `IsConfigured == false` and refuses to call anything.
+
+## Logging
+
+The client logs through the standard `ILogger<FaiLicenceClient>` (category `AlfaVision.FaiLicence.FaiLicenceClient`), so it
+lands in whatever provider your application uses — Serilog, the console, Application Insights. With DI nothing needs
+to be configured; without DI, pass a logger or `NullLogger<FaiLicenceClient>.Instance`.
+
+| Level | When | Example |
+|---|---|---|
+| Debug | a call starts | `FAI licence search starting with parameters [country,include_invalid,search_number]` |
+| Information | a call completes | `FAI licence search [...] returned 3 licences in 412 ms`, `FAI licence details for licence 101: expired=False suspended=False in 230 ms` |
+| Warning | a call fails | `FAI licence database answered 403 (licences)`, `… did not answer in time (licence/{id}, timeout 20 s)`, `… not configured` |
+
+What is **never** logged: the request URL, the user name, the password, search *values* (a `search_name` is a person's
+name) or anything from the response body. Only parameter names, counts, status codes, durations and licence ids.
+Set the category to `Warning` in production if the per-call Information lines are too chatty.
 
 ## Security
 

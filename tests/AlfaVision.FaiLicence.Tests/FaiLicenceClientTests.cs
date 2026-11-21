@@ -43,7 +43,7 @@ public class FaiLicenceClientTests
 
     private readonly FaiStub _stub = new();
     private FaiLicenceOptions Options { get; } = new() { BaseUrl = BaseUrl, Username = "nac-api-user", Password = Password };
-    private FaiLicenceClient Client => new(new HttpClient(_stub), Microsoft.Extensions.Options.Options.Create(Options));
+    private FaiLicenceClient Client => new(new HttpClient(_stub), Microsoft.Extensions.Options.Options.Create(Options), Microsoft.Extensions.Logging.Abstractions.NullLogger<FaiLicenceClient>.Instance);
 
     private static object Licence(int id, string ioc, string number, string given, string surname, string validUntil, bool expired) =>
         new { idlicence = id, idlicencee = 1000 + id, IOC = ioc, licencenumber_lic = number, givenname_lip = given, surname_lip = surname,
@@ -147,7 +147,7 @@ public class FaiLicenceClientTests
     [Fact]
     public async Task NotConfigured_IsAnError_BeforeAnyRequest()
     {
-        var client = new FaiLicenceClient(new HttpClient(_stub), Microsoft.Extensions.Options.Options.Create(new FaiLicenceOptions()));
+        var client = new FaiLicenceClient(new HttpClient(_stub), Microsoft.Extensions.Options.Options.Create(new FaiLicenceOptions()), Microsoft.Extensions.Logging.Abstractions.NullLogger<FaiLicenceClient>.Instance);
         Assert.False(client.IsConfigured);
         await Assert.ThrowsAsync<InvalidOperationException>(() => client.SearchAsync(new Dictionary<string, string?>()));
         Assert.Empty(_stub.Requests);

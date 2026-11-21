@@ -10,6 +10,7 @@
 using AlfaVision.FaiLicence;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 var configuration = new ConfigurationBuilder()
     .AddUserSecrets<SampleMarker>(optional: true)
@@ -24,6 +25,7 @@ if (number is null && name is null)
 }
 
 var services = new ServiceCollection();
+services.AddLogging(b => b.AddSimpleConsole().SetMinimumLevel(LogLevel.Information));   // the client logs its calls (never the URL or credentials)
 services.AddFaiLicenceClient(options => configuration.GetSection(FaiLicenceOptions.SectionName).Bind(options));
 await using var provider = services.BuildServiceProvider();
 var client = provider.GetRequiredService<FaiLicenceClient>();

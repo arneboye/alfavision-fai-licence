@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0 (2026-11-21)
+
+- **Logging.** `FaiLicenceClient` logs its activity through `Microsoft.Extensions.Logging.ILogger<FaiLicenceClient>`: each call at
+  Debug (start) and Information (endpoint, result count, duration), failures at Warning. Never the URL, the credentials,
+  search values or response content — only parameter names, counts, status codes and licence ids.
+- **Breaking:** the constructor now requires the logger: `new FaiLicenceClient(httpClient, options, logger)`. With DI nothing
+  changes (`AddFaiLicenceClient` resolves it). Without logging, pass `NullLogger<FaiLicenceClient>.Instance`
+  (`Microsoft.Extensions.Logging.Abstractions`, now a dependency of the package).
+- README: sections "Logging" and "Testing your code" (asserting log lines with `FakeLogger`); sample app logs to the console.
+
 ## 0.2.0 (2026-11-20)
 
 - `IFaiLicenceClient` — the client as an interface; `AddFaiLicenceClient` registers it alongside `FaiLicenceClient`.

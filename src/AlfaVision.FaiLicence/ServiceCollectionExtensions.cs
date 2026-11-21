@@ -13,6 +13,10 @@ public static class ServiceCollectionExtensions
     /// default <c>HttpClient</c> logging writes the full request URL at Information level — which would put the
     /// user name and the (base64-encoded) password into your logs.
     /// </para>
+    /// <para>
+    /// The client itself logs through <c>ILogger&lt;FaiLicenceClient&gt;</c>, resolved from the container (<c>AddHttpClient</c> registers
+    /// logging, so no extra call is needed); wire your logging provider (Serilog, console, …) as usual.
+    /// </para>
     /// </summary>
     public static IServiceCollection AddFaiLicenceClient(this IServiceCollection services, Action<FaiLicenceOptions> configure)
     {

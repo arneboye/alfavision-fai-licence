@@ -52,7 +52,7 @@ public class TestingHelpersTests
     public async Task Handler_ServesSearchAndDetails_ThroughTheRealClient()
     {
         var handler = new FaiLicenceTestHandler { Username = "nac-api-user", Password = "secret" };
-        var client = new FaiLicenceClient(new HttpClient(handler), Options);
+        var client = new FaiLicenceClient(new HttpClient(handler), Options, Microsoft.Extensions.Logging.Abstractions.NullLogger<FaiLicenceClient>.Instance);
 
         var cards = await client.SearchAsync(new Dictionary<string, string?> { ["search_number"] = "DSvU1002", ["include_invalid"] = "1" });
         Assert.Equal([102, 103], cards.Select(c => c.IdLicence));
@@ -73,16 +73,16 @@ public class TestingHelpersTests
     public async Task Handler_WrongCredentials_UnknownId_AndOutage()
     {
         var wrong = new FaiLicenceTestHandler { Username = "someone-else" };
-        var ex = await Assert.ThrowsAsync<FaiLicenceException>(() => new FaiLicenceClient(new HttpClient(wrong), Options).GetDetailsAsync(101));
+        var ex = await Assert.ThrowsAsync<FaiLicenceException>(() => new FaiLicenceClient(new HttpClient(wrong), Options, Microsoft.Extensions.Logging.Abstractions.NullLogger<FaiLicenceClient>.Instance).GetDetailsAsync(101));
         Assert.Contains("403", ex.Message);
         Assert.DoesNotContain("secret", ex.Message);
 
         var ok = new FaiLicenceTestHandler();
-        var notFound = await Assert.ThrowsAsync<FaiLicenceException>(() => new FaiLicenceClient(new HttpClient(ok), Options).GetDetailsAsync(999));
+        var notFound = await Assert.ThrowsAsync<FaiLicenceException>(() => new FaiLicenceClient(new HttpClient(ok), Options, Microsoft.Extensions.Logging.Abstractions.NullLogger<FaiLicenceClient>.Instance).GetDetailsAsync(999));
         Assert.Contains("404", notFound.Message);
 
         var down = new FaiLicenceTestHandler { FailWith = HttpStatusCode.ServiceUnavailable };
-        var outage = await Assert.ThrowsAsync<FaiLicenceException>(() => new FaiLicenceClient(new HttpClient(down), Options).SearchAsync(new Dictionary<string, string?>()));
+        var outage = await Assert.ThrowsAsync<FaiLicenceException>(() => new FaiLicenceClient(new HttpClient(down), Options, Microsoft.Extensions.Logging.Abstractions.NullLogger<FaiLicenceClient>.Instance).SearchAsync(new Dictionary<string, string?>()));
         Assert.Contains("503", outage.Message);
     }
 
